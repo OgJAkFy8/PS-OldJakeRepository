@@ -11,6 +11,9 @@ Function f_verFileName ($baseNAME){
 $t = (get-item $baseNAME).VersionInfo.FileVersion
 return  $baseNAME + "_" + $t + ".bkp"
 }
+#f_verFileName $FileDL
+
+Function f_tstFile ($TestFileName){}
 
 Function f_FileDownload (){
 Invoke-WebRequest $Site -OutFile $FileDL
@@ -66,4 +69,3 @@ if($LocalFileVer -ne $OnlineFileVer){
     }
 
 Write-Host "Finished!"
-
