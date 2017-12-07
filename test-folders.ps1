@@ -1,38 +1,18 @@
-<#############################################
-Script Name: test-folders.ps1
-Author Name: Erik Arnesen
-Date: 10/5/2017
-Contact : 
-
+<#
 .SYNOPSIS
-This is a simple Powershell script to create a group of nested folders. The depth is decided by the number you add.
-
+    This is a simple Powershell script to create a group of nested folders. The depth is decided by the number you add.
 .DESCRIPTION
-The script itself will only print 'Hello World'. But that's cool. It's main objective is to show off the cool help thingy anyway.
-
+    The script itself will only print 'Hello World'. But that's cool. It's main objective is to show off the cool help thingy anyway.
 .EXAMPLE
-./test-folders.ps1 2 
+    c:\PS> .\test-folders.ps1 2 
 
 .NOTES
-Put some notes here.
-
+    Script Name: test-folders.ps1
+    Author Name: Erik
+    Date: 10/5/2017
+    Contact : 
 .LINK
-
-C:Temp\
-├───101
-│   ├───TopLev-1
-│   │   ├───NestFoldr-1-1
-│   │   ├───NestFoldr-1-2
-│   │   └───NestFoldr-1-3
-│   ├───TopLev-2
-│   │   ├───NestFoldr-2-1
-│   │   ├───NestFoldr-2-2
-│   │   └───NestFoldr-2-3
-│   └───TopLev-3
-│       ├───NestFoldr-3-1
-│       ├───NestFoldr-3-2
-│       └───NestFoldr-
-
+     PowerShell_VM-Modules/test-folders.ps1 
 
 function test-set {
     [CmdletBinding(DefaultParameterSetName = 3)]
@@ -50,7 +30,7 @@ function test-set {
 }
 #>
 
-function global:ADD-TestFolders{
+function script:ADD-TestFolders{
 
 [CmdletBinding(
     DefaultParameterSetName = "TargetFolder", 
