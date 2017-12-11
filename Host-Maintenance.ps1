@@ -9,6 +9,8 @@ This Script migrates all machines to one host so you can reboot the empty one.
 #>
 
 
+. "C:\Users\Erik.Arnesen\Documents\GitHub\PowerShell_VM-Modules\f_CreateMenu.ps1"
+
 # Functions 
 Function ScriptSafety{
     If ($WhatIfPreference -eq $true){
@@ -138,9 +140,11 @@ $NorfolkHosts = Get-VMHost | where {$_.name -notlike "214.54.208.*"}
 Do {
 $MenuSelection = ""
 
-Menu-Main
+#Menu-Main
+CreateMenu -Title "Welcome to the Maintenance Center" -MenuItems "Set Safety On/Off","EXIT","Move all VM's to one host","Reboot Empty host","Balance all VM's per 'tag'","Move and Reboot and Balance VM environment","VM/Host information","Exit" -TitleColor Red -LineColor Cyan -MenuItemColor Yellow
+
 $MenuSelection = Read-Host "Enter a selection from above"
-    if($menuSelection -eq 0){
+    if($menuSelection -eq 1){
         If ($WhatIfPreference -eq $true){
             $WhatIfPreference = $false}
         else{$WhatIfPreference = $true}}
@@ -155,7 +159,7 @@ $MenuSelection = Read-Host "Enter a selection from above"
 
 
 switch ($MenuSelection){
-1 {
+3 {
     Clear-Host
     $HostOne = Read-Host "Enter IP Address of host to move from"
     $HostTwo = Read-Host "Enter IP Address of host to move to"
@@ -164,13 +168,13 @@ switch ($MenuSelection){
     if($HostTwo -ne $HostOne){
         MoveVMs $HostOne $HostTwo
         }}
-2 {
+4 {
     Clear-Host
     Remove-COOPs}
-3 {
+5 {
     Clear-Host
     Create-COOPs}
-4 {
+6 {
     Clear-Host
     BalanceVMs}
 Default {Write-Host "Exit"}
