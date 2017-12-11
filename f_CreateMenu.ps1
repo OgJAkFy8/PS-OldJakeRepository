@@ -9,6 +9,7 @@ if  ($TitleCount -lt $LongestMenuItem)
 $reference = $LongestMenuItem
 }
 else
+
 {$reference = $TitleCount}
 $reference = $reference + 10
 $Line = "═"*$reference
@@ -42,4 +43,4 @@ Write-Host "╚" -NoNewline -f $LineColor;Write-Host $Line -NoNewline -f $LineCo
 }
 
 
-CreateMenu -Title "THIS IS TITLE" -MenuItems "Exchange Server","Active Directory","Sytem Center Configuration Manager","Lync Server","Microsoft Azure" -TitleColor Red -LineColor Cyan -MenuItemColor Yellow
+# CreateMenu -Title "THIS IS TITLE" -MenuItems "Exchange Server","Active Directory","Sytem Center Configuration Manager","Lync Server","Microsoft Azure" -TitleColor Red -LineColor Cyan -MenuItemColor Yellow

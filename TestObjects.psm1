@@ -30,7 +30,10 @@ function test-set {
 }
 #>
 
-function script:ADD-TestFolders{
+function New-NestedFolders{
+
+Write-Host "Creating nested folders and files in 'c:\Temp\NestedFolders' "
+sleep 15
 
 [CmdletBinding(
     DefaultParameterSetName = "TargetFolder", 
@@ -111,9 +114,9 @@ While ($j -le $FolderDepth) {
 }
 
 
-function delfold (){
+function Remove-NestedFolders (){
 $limit = (Get-Date).AddDays(-0)
-$path = "C:\Temp\foldtest"
+$path = "c:\Temp\NestedFolders"
 
 # Delete files older than the $limit.
 Get-ChildItem -Path $path -Recurse -Force | Where-Object { !$_.PSIsContainer -and $_.CreationTime -lt $limit } | Remove-Item -Force
