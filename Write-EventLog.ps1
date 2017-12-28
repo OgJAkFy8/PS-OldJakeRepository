@@ -1,4 +1,8 @@
-﻿function Write-EventLog
+﻿#region Come on man
+throw "You're not supposed to hit F5"
+#endregion"
+
+function Write-EventLog
 {
     [cmdletbinding()]
     param(  

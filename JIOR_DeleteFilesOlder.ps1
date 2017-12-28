@@ -7,7 +7,8 @@ Author Name: Raydi H. //rjh
 
 Requirements - Powershell / Must be run on locally on Event Log Analyzer
 
-.NAME DeleteFilesOlder.ps1
+.NAME 
+DeleteFilesOlder.ps1
 
 
 .SYNOPSIS
@@ -53,16 +54,16 @@ Change Log:
 
 # Parameters
 param(
-    [String]$workingLocation = ".\CleanUpScript",
+    [String]$LogLocation = "c:\temp\test", #".\CleanUpScript",
     [String]$Logfile="Cleanup.log",
-    [Int]$DaysBack = 4
+    [Int]$DaysBack = 0
     ) 
 
 # User Settings
 #<><><><><><><><><><><><><><><><><><><>
 
 # Sets Path for file deletion
-$Script:path = "c:\temp" #"D:\ManageEngine\EventLog Analyzer\ES\data\ELA-C1\nodes\0\indices"
+$Script:path = "c:\temp\test" #"D:\ManageEngine\EventLog Analyzer\ES\data\ELA-C1\nodes\0\indices"
  
 # Set date of when files will be deleted before.  
 # Amount of days to keep.  Delete all files older than X days back.
@@ -74,16 +75,13 @@ $Script:Service = Get-Service netman #Eventloganalyzer  #Future option make this
 $ScriptName = $MyInvocation.MyCommand.Name
 
 # Event Log
-$Script:e_logname = "JIOR Log" 
+$Script:e_logname = "PS Test Log"#"JIOR Log" 
 $Script:e_source = “My Script”  #"DeleteFilesOlder"
 
 #<><><><><><><><><><><><><><><><><><><>
 
 # Create Event
 #New-EventLog –LogName "PS Test Log" –Source $ScriptName
-
-
-
 
 #Functions 
 #------------
@@ -94,25 +92,28 @@ $asAdmin = ([Security.Principal.WindowsPrincipal] `
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 
-function f_make-filefold($Outputfile,$it){
+function f_make-filefold($OutputFileFold,$it){
     f_Event 100 "Start f_make-filefold"
     if($it -eq "File"){
-        if(!(test-path $Outputfile)){New-Item $Outputfile -type file -Force}
+        if(!(test-path $OutputFileFold)){New-Item $OutputFileFold -type file -Force}
         }
-    else{
-        if(!(test-path $Outputfold)){New-Item $Outputfold -type Directory -Force}
+    if($it -eq "Folder"){
+        if(!(test-path $OutputFileFold)){New-Item $OutputFileFold -type Directory -Force}
         }}
 
 
 
 # Creates a unique name for the log file
-function f_make-tdFILEname ($baseNAME) {
+function f_make-tdFILEname ($baseNAME, $format) {
     f_Event 100 "start function make-tdFILEname"
 
-    #$t = Get-Date -uformat "%y%m%d%H%M" # 1703162145 YYMMDDHHmm
-    $t = Get-Date -uformat "%Y%m%d" # 20170316 YYYYMMDD
-    #$t = Get-Date -uformat "%d%H%M%S" # 16214855 DDHHmmss
-    #$t = Get-Date -uformat "%y/%m/%d_%H:%M" # 17/03/16_21:52
+    switch ($format){
+    1{$t = Get-Date -uformat "%y%m%d%H%M"} # 1703162145 YYMMDDHHmm
+    2{$t = Get-Date -uformat "%Y%m%d"} # 20170316 YYYYMMDD
+    3{$t = Get-Date -uformat "%d%H%M%S"} # 16214855 DDHHmmss
+    4{$t = Get-Date -uformat "%y/%m/%d_%H:%M"} # 17/03/16_21:52
+    default{f_Event 200 "No format selected for make-tdFILEname"}
+    }
     return $baseNAME + "-"+ $t + ".log"
 }
 
@@ -141,25 +142,47 @@ if($state -eq "Start"){
 function f_Event($e_id,$e_message,$e_type){
     #Used to ease the writing events to the log.
     # e_logname and e_source are defined in the User Settings
-
-
+    
     if($e_type -eq $null){$e_type = "Information"}
     Write-EventLog –LogName $e_logname –Source $e_source –EntryType $e_type –EventID $e_id –Message $e_message
 }
 
+
+function f_Output($Outputfile, $strtTime, $stopTime){
+    f_Event 100 “Start Function - f_Output | $ScriptName”
+    
+    $o = New-Object PSObject
+    $o | Add-Member -MemberType NoteProperty -Name 'Time Started' -value $strtTime
+    $o | Add-Member -MemberType NoteProperty -Name 'Time Stopped' -value $dayLimit
+    $o | Add-Member -MemberType NoteProperty -Name 'Time Elapsed' -value $limit
+    $o | Add-Member -MemberType NoteProperty -Name 'Folders Deleted' -value $fileCount
+    $o | Add-Member -MemberType NoteProperty -Name 'Space Recovered' -value $spaceRecovered
+    $o | Add-Member -MemberType NoteProperty -Name 'Before Date' -value $(($stopTime-$strtTime).totalseconds)
+    $o | Add-Member -MemberType NoteProperty -Name 'Run by' -value $env:USERNAME
+        
+    $o | Export-Csv $Outputfile -notypeinformation -Append
+    f_Event 100 “$o”
+    }
+
+
+
+
 # Output File
 # Create the output file and setup the output
-function f_Output($Outputfile, $strtTime, $stopTime){
-    f_Event 100 “Start Function - f_Output”
+function testf_Output($Outputfile, $strtTime, $stopTime){
+    f_Event 100 “Start Function - f_Output | $ScriptName”
     $r = @($strtTime,$dayLimit,$limit,$fileCount,$spaceRecovered,$(($stopTime-$strtTime).totalseconds),$stopTime,$env:USERNAME)
     if(!(test-path $Outputfile)){
     "Time Started,Time Stopped,Time Elapsed,Folders Deleted,Space Recovered,Before Date,Run by"| Out-File $Outputfile -Append 
     }
     $r -join "," | Out-File $Outputfile -Append
+    
+    f_Event 100 “f_Output | $ScriptName | $r”
+    
 
     }
 
-f_Output "c:\temp\test22.txt" 3 4
+#f_Output "c:\temp\test\out22.txt" 3 4
 
 
 
@@ -167,9 +190,12 @@ f_Output "c:\temp\test22.txt" 3 4
 function f_deleteFileFold(){
     f_Event 100 "Start deleteFileFold"
     
-    $bforSum = f_fileMath "sum"
-    (Get-ChildItem -Directory $path -Recurse | where CreationTime -lt $limit).Attributes #| Remove-Item -Force -Recurse  -WhatIf
-    sleep 20
+    $bforSum = f_fileMath "sum | $ScriptName"
+    #(Get-ChildItem -Directory $path -Recurse | where CreationTime -lt $limit).Attributes #| Remove-Item -Force -Recurse  -WhatIf
+    #Get-ChildItem -path $path -name "test*" | 
+    #Remove-Item -Force  -whatif # where CreationTime -lt $limit).Attributes #| Remove-Item -Force -Recurse  -WhatIf
+    Get-ChildItem "$path\*" | where {$_.Attributes -eq "Archive"} | Remove-Item -exclude "*.log" 
+    sleep 9
     $aftrSum = f_fileMath "sum"
     $Script:spaceRecovered = ($bforSum.sum + $aftrSum.sum)/1MB
 }
@@ -189,18 +215,20 @@ function f_fileMath($r){
 
 # Begin Script
 # ========================
-$t = split-path $PSCommandPath -Parent
-set-location $t
+f_Event 100 "Start Script | $ScriptName"
+
+#$t = split-path $PSCommandPath -Parent
+#set-location $t
 #.\DeleteFilesOlder.ps1
 
 
 #if ($asAdmin -ne $true){
 
 # Set working and log location
-#f_make-filefold $workingLocation "folder"
-#Set-Location $workingLocation
+f_make-filefold $LogLocation "folder"
+Set-Location $LogLocation
 
-# Set name of file
+# Set name of log file
 f_make-filefold $Logfile "file"
 $Script:Outputfile = $Logfile
 
@@ -210,15 +238,15 @@ $Script:limit = (Get-Date).AddDays(-$dayLimit)
 $Script:fileCount = f_fileMath "cnt"
 
 # Test if there are files to be deleted
-if ($fileCount -gt 5){
+if ($fileCount -gt 0){
     Write-Debug "Script Loop"
     $strtTime = Get-Date #f_TimeStamp
-    f_serviceControl $Service "stop"
+    #f_serviceControl $Service "stop"
     f_deleteFileFold
-    f_serviceControl $Service "start"
+    #f_serviceControl $Service "start"
     $stopTime = Get-Date # f_TimeStamp
     f_Output $Outputfile $strtTime $stopTime
-    Write-Host "Job Completed!  View Log: $workingLocation\$Logfile" -ForegroundColor White -BackgroundColor DarkGreen
+    Write-Host "Job Completed!  View Log: $LogLocation\$Logfile" -ForegroundColor White -BackgroundColor Green
 
 }
 #}
