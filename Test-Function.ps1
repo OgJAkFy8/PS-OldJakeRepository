@@ -1,8 +1,7 @@
 ﻿function get-DJOSinfo {
     [CmdletBinding(SupportsShouldProcess=$true,ConfirmImpact='Low')]
     param(
-        [Parameter(Mandatory=$true,
-        ValueFromPipeline=$true,
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true,
         ValueFromPipelineByPropertyName=$true)]
     [Alias('hostname')]
     [ValidateLength(4,14)]
@@ -36,7 +35,7 @@
                 try {
                     $continue = $true
                     $os = Get-WmiObject -EA 'Stop' -EV myErr -ComputerName $computer -Class win32_operatingsystem | 
-                        select caption,buildnumber,osarchitecture,servicepackmajorversion
+                        Select-Object caption,buildnumber,osarchitecture,servicepackmajorversion
                     } 
                 catch {
                     $continue = $false
@@ -44,8 +43,8 @@
                     #$myErr | Out-File '.\errormessages.txt'
                     }
                 if($continue) {
-                    $bios = Get-WmiObject -ComputerName $computer -Class win32_operatingsystem | select serialnumber
-                    $processor = Get-WmiObject -ComputerName $computer -Class win32_processor | select addresswidth -First 1
+                    $bios = Get-WmiObject -ComputerName $computer -Class win32_operatingsystem | Select-Object serialnumber
+                    $processor = Get-WmiObject -ComputerName $computer -Class win32_processor | Select-Object addresswidth -First 1
                     $osarchitecture = $os.osarchitecture -replace '-bit',''
                     $properties = @{'ComputerName'=$computer;
                                     'OSVersion'=$os.caption;

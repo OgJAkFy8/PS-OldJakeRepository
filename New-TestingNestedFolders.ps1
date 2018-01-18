@@ -30,23 +30,23 @@ function test-set {
 }
 #>
 
-function script:ADD-TestFolders{
+function script:New-TestFolders{
 
 [CmdletBinding(
-    DefaultParameterSetName = "TargetFolder", 
-    SupportsShouldProcess = $True)]
+    DefaultParameterSetName = 'TargetFolder', 
+    SupportsShouldProcess)]
 
 param(
     [Int]$FolderDepth = 3,
-    [STRING]$TargFldr = "c:\Temp\NestedFolders",
-    [STRING]$tpLevFldr = "TopLev",
-    [STRING]$NstFldr = "NestFoldr",
-    [STRING]$TstFile = "TestFile"
+    [STRING]$TargFldr = 'c:\Temp\NestedFolders',
+    [STRING]$tpLevFldr = 'TopLev',
+    [STRING]$NstFldr = 'NestFoldr',
+    [STRING]$TstFile = 'TestFile'
     )
 
-    WRITE-DEBUG "`$TargFldr: $TargFldr"
-    WRITE-DEBUG "`$tpLevFldr: $tpLevFldr"
-    WRITE-DEBUG "`$NstFldr: $NstFldr"
+    WRITE-DEBUG -Message ("`$TargFldr: {0}" -f $TargFldr)
+    WRITE-DEBUG -Message ("`$tpLevFldr: {0}" -f $tpLevFldr)
+    WRITE-DEBUG -Message ("`$NstFldr: {0}" -f $NstFldr)
 
 
     <#
@@ -111,9 +111,9 @@ While ($j -le $FolderDepth) {
 }
 
 
-function delfold (){
+function remove-folder (){
 $limit = (Get-Date).AddDays(-0)
-$path = "C:\Temp\foldtest"
+$path = 'C:\Temp\foldtest'
 
 # Delete files older than the $limit.
 Get-ChildItem -Path $path -Recurse -Force | Where-Object { !$_.PSIsContainer -and $_.CreationTime -lt $limit } | Remove-Item -Force
