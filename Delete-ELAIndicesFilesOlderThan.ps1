@@ -9,7 +9,6 @@
     .NAME 
     DeleteFilesOlder.ps1
 
-
     .SYNOPSIS
     Searches a directory for files older than a certain date a deletes the files and folders.  If there isn't more then 5 folders to delete it does not run.
 
@@ -17,7 +16,6 @@
     Stops the Services - Eventloganalyzer
     Deletes files and folders in "D:\ManageEngine\EventLog Analyzer\ES\data\ELA-C1\nodes\0\indices"
     Starts the Services - Eventloganalyzer
-
 
     .EXAMPLE
     DeleteFilesOlder.ps1 
@@ -60,8 +58,7 @@ param(
   [Int]$DaysBack = 4
 ) 
 
-# User Settings
-#<><><><><><><><><><><><><><><><><><><>
+# User Settings <><><><><><><><><><><><><><><><><><><>
 
 # Sets Path for file deletion
 $Script:path = 'D:\ManageEngine\EventLog Analyzer\ES\data\ELA-C1\nodes\0\indices'
@@ -77,66 +74,82 @@ $ScriptName = $MyInvocation.MyCommand.Name
 #<><><><><><><><><><><><><><><><><><><>
 
 # Create Event
+# Future use for adding the log file to the event log.
 #New-EventLog -LogName "PS Test Log" -Source $ScriptName
 
-#Functions 
-#------------
+
+#--------------------------
+# Internal Script Functions 
+# These are recycled scripts which have been turned into function for F2 of this script.
 
 # Test if the script is "RunasAdminsitrator"
 $asAdmin = ([Security.Principal.WindowsPrincipal] `
-  [Security.Principal.WindowsIdentity]::GetCurrent() `
-).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    [Security.Principal.WindowsIdentity]::GetCurrent() `
+    ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 function f_fileTest{
 
   param
   (
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true)]
     [Object]$Outputfile
   )
   if(!(test-path -Path $Outputfile)){New-Item -Path $Outputfile -ItemType file -Force}
 }
+
 function f_foldTest{
 
   param
   (
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true)]
     [Object]$Outputfold
   )
   if(!(test-path -Path $Outputfold)){New-Item -Path $Outputfold -ItemType Directory -Force}
 }
 
-# Creates a unique name for the log file
-function f_tdFILEname {
-  #$t = Get-Date -uformat "%y%m%d%H%M" # 1703162145 YYMMDDHHmm
-    
+function get-TimeStamp{
+  # 
   param
   (
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
-    [Object]$baseNAME
+    [Parameter(Mandatory=$true,HelpMessage='Use the following formats - YYYYMMDD, DDHHmmss, YYMMDD_HHMM, YYMMDDHHmm')]
+    [ValidateSet("YYYYMMDD", "DDHHmmss", "YYMMDD_HHMM", "YYMMDDHHmm")] $Format
   )
-  $t = Get-Date -uformat '%Y%m%d' # 20170316 YYYYMMDD
-  #$t = Get-Date -uformat "%d%H%M%S" # 16214855 DDHHmmss
-  #$t = Get-Date -uformat "%y/%m/%d_%H:%M" # 17/03/16_21:52
+  switch ($Format) {
+    YYYYMMDD {$Script:TimeStamp = Get-Date -uformat '%Y%m%d'} # 20170316 YYYYMMDD
+    DDHHmmss {$Script:TimeStamp = Get-Date -uformat "%d%H%M%S"} # 16214855 DDHHmmss
+    YYMMDD_HHMM {$Script:TimeStamp = Get-Date -uformat "%y/%m/%d_%H:%M"} # 17/03/16_21:52 YYMMDD_HHMM
+    YYMMDDHHmm {$Script:TimeStamp = Get-Date -uformat "%y%m%d%H%M"} # 1703162145 YYMMDDHHmm
+    MMDDYY-Time {$Script:TimeStamp = Get-Date -uformat '%m/%d/%y %H:%M:%S'}
+    Default {$Script:TimeStamp = Get-Date -uformat '%d/%m/%Y'} # 03/16/2018
+  }
+  return $Script:TimeStamp
+}
+
+<# Unneeded section
+function f_tdFILEname ($baseName){
+  ## 
+  $t = get-TimeStamp -format YYYYMMDD
   return $baseNAME + '-'+ $t + '.log'
 }
 
 # Time Stamp
 Function f_TimeStamp(){
   # 10/27/2017 21:52:34 (This matches the output for "Date Deleted to" to help readablity
-  $Script:TimeStamp = Get-Date -uformat '%m/%d/%y %H:%M:%S'
+   get-TimeStamp MMDDYY-Time
   return $TimeStamp
 }
+
+#>
 
 # Stops and starts services
 Function f_serviceControl{
 
   param
   (
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true,HelpMessage='The service that needs to be controlled')]
     [Object]$Service,
 
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true,HelpMessage='The state to put the service in')]
     $state
   )
   Write-Debug -Message 'ServiceControl'
@@ -158,13 +171,13 @@ function f_Output{
     
   param
   (
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true)]
     $Outputfile,
 
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true)]
     $strtTime,
 
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
+    [Parameter(Mandatory=$true)]
     $stopTime
   )
   '===================================' | Out-File -FilePath $Outputfile -Append
@@ -195,10 +208,10 @@ function f_fileMath{
 
   param
   (
-    [Parameter(Mandatory=$true,HelpMessage='Add help message for user')]
-    $r
+    [Parameter(Mandatory=$true,HelpMessage='Count or Sum')]
+    $mathSelection
   )
-  if ($r -eq 'cnt'){
+  if ($mathSelection -eq 'cnt'){
     # Count
     (Get-ChildItem -Directory -Path $path | Where-Object CreationTime -lt $limit).count
   }
@@ -208,10 +221,6 @@ function f_fileMath{
   }
 }
 
-
-#
-#
-#  
 # Begin Script
 # ========================
 
@@ -224,7 +233,6 @@ if ($asAdmin -ne $true){
   # Set name of file
   f_fileTest -Outputfile $Logfile
   $Script:Outputfile = $Logfile
-
 
   # Math
   $Script:limit = (Get-Date).AddDays(-$dayLimit)
