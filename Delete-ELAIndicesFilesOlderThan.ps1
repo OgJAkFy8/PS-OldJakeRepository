@@ -3,39 +3,29 @@
 
 <#
     Author Name: Raydi H. //rjh
-
     Requirements - Powershell / Must be run on locally on Event Log Analyzer
 
     .NAME 
     DeleteFilesOlder.ps1
-
     .SYNOPSIS
     Searches a directory for files older than a certain date a deletes the files and folders.  If there isn't more then 5 folders to delete it does not run.
-
     .Description
     Stops the Services - Eventloganalyzer
     Deletes files and folders in "D:\ManageEngine\EventLog Analyzer\ES\data\ELA-C1\nodes\0\indices"
     Starts the Services - Eventloganalyzer
-
     .EXAMPLE
     DeleteFilesOlder.ps1 
-
     .EXAMPLE
     DeleteFilesOlder.ps1  -workingLocation "D:\Clean UpScript" -Logfile "Cleanup.log"
- 
     .EXAMPLE
     DeleteFilesOlder.ps1  -workingLocation "D:\Clean UpScript" -Logfile "Cleanup.log" -DaysBack 4
-
     .PARAMETER Logfile
     You can create a name for your log file or leave the default which is "Cleanup.log" 
-
     .PARAMETER DaysBack
     This is the amount of days you want to save.  Any file older than X days will be deleted. The default for this is "4"
     Which means that 5+ days will be deleted
-
     .PARAMETER workingLocation
     This is where the file outputs to and should be where you are running this from.  The default is ".\CleanUpScript"
-
     .NOTES
     Change Log:
     1.0 New Script //rjh
@@ -46,7 +36,6 @@
     1.5 A number of changes to combine tasks //eja
     1.6 Much more clean up and added Recovered amount //eja
     2.0 Removed aliases and made code more vobose.  
- 
 #>
 
 
@@ -57,12 +46,10 @@ param(
   [String]$Logfile='Cleanup.log',
   [Int]$DaysBack = 4
 ) 
-
 # User Settings <><><><><><><><><><><><><><><><><><><>
-
 # Sets Path for file deletion
 $Script:path = 'D:\ManageEngine\EventLog Analyzer\ES\data\ELA-C1\nodes\0\indices'
- 
+
 # Set date of when files will be deleted before.  
 # Amount of days to keep.  Delete all files older than X days back.
 $Script:dayLimit = $DaysBack
@@ -77,7 +64,6 @@ $ScriptName = $MyInvocation.MyCommand.Name
 # Future use for adding the log file to the event log.
 #New-EventLog -LogName "PS Test Log" -Source $ScriptName
 
-
 #--------------------------
 # Internal Script Functions 
 # These are recycled scripts which have been turned into function for F2 of this script.
@@ -88,7 +74,6 @@ $asAdmin = ([Security.Principal.WindowsPrincipal] `
     ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 function f_fileTest{
-
   param
   (
     [Parameter(Mandatory=$true)]
@@ -98,7 +83,6 @@ function f_fileTest{
 }
 
 function f_foldTest{
-
   param
   (
     [Parameter(Mandatory=$true)]
@@ -108,7 +92,6 @@ function f_foldTest{
 }
 
 function get-TimeStamp{
-  # 
   param
   (
     [Parameter(Mandatory=$true,HelpMessage='Use the following formats - YYYYMMDD, DDHHmmss, YYMMDD_HHMM, YYMMDDHHmm')]
@@ -143,12 +126,10 @@ Function f_TimeStamp(){
 
 # Stops and starts services
 Function f_serviceControl{
-
   param
   (
     [Parameter(Mandatory=$true,HelpMessage='The service that needs to be controlled')]
     [Object]$Service,
-
     [Parameter(Mandatory=$true,HelpMessage='The state to put the service in')]
     $state
   )
@@ -173,10 +154,8 @@ function f_Output{
   (
     [Parameter(Mandatory=$true)]
     $Outputfile,
-
     [Parameter(Mandatory=$true)]
     $strtTime,
-
     [Parameter(Mandatory=$true)]
     $stopTime
   )
