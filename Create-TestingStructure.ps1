@@ -33,8 +33,7 @@ function add-testFolders {
 		[Parameter(Mandatory=$true,
 			ValueFromPipeline=$true,
 			ValueFromPipelineByPropertyName=$true)]
-		[Alias('Folder Depth')]
-		[Int]$FldrDpth,[parameter(mandatory=$true,position=0,parametersetname="DepthofFolderStructure")]
+		[Int]$FldrDpth = 2,[parameter(mandatory=$true,position=0,parametersetname="DepthofFolderStructure")]
 		[Int]$FolderAmount = 4,[parameter(mandatory=$true,position=1,parametersetname="AmountOfFolders")]
 		[STRING]$TargFldr = 'c:\Temp\TestingFolders',
 		[STRING]$tpLevFldr = 'TopLev',
@@ -47,47 +46,61 @@ function add-testFolders {
 		WRITE-DEBUG -Message ("`$tpLevFldr: {0}" -f $tpLevFldr)
 		WRITE-DEBUG -Message ("`$NstFldr: {0}" -f $NstFldr)
 
-		Set-Location 'c:\temp' #$TargFldr
-
+<#
 		@"
-	Parameterset is: {0}
-	Bar is: '{1}'
-	-TargFldr present: {2}
-	FilePath: {3}
-"@ -f $PSCmdlet.ParameterSetName, $FolderDepth, $TargFldr.IsPresent, $FilePath
+		Parameterset is: {0}
+		Bar is: '{1}'
+		-TargFldr present: {2}
+		FilePath: {3}
+		"@ -f $PSCmdlet.ParameterSetName, $FolderDepth, $TargFldr.IsPresent, $FilePath
+#>
+		Set-Location 'c:\temp\TestingFolders' #$TargFldr
 
 		$i = 1
 		Do {
+			Write-Debug "c:\temp\TestingFolders\NestedFolders-$i"
 			$TargFldr = "c:\temp\TestingFolders\NestedFolders-$i"
 			$i++
 		}while (Test-Path $TargFldr)
-
 		if(!(Test-Path $TargFldr)){
 			New-Item -ItemType Directory -Path $TargFldr -Force
 		}
 
+
 		$i = 0
 		While ($i -le $FolderDepth) {
 			$i++
-			Set-Location $TargFldr
-			New-Item -ItemType Directory -Path $TargFldr"\"$tpLevFldr"-"$i -Force
-			#Set-Location .\$tpLevFldr"-"$i
+			<# $FolderAmount
+			While ($h -lt $FolderAmount){
+			Write-Debug "TargFldr: $TargFldr"
+			New-Item -ItemType Directory -Path $TargFldr"\"$tpLevFldr"-"$h -Force
 			$j = 0
-			While ($j -le $FolderDepth) {
+			While ($j -le $FolderAmount) {
 				$j +=1
-				#Set-Location .\$tpLevFldr"-"$i
-				New-Item -ItemType Directory -Path $TargFldr"\"$tpLevFldr"-"$i"\"$NstFldr"-"$i"-"$j -Force
+				New-Item -ItemType Directory -Path $TargFldr"\"$tpLevFldr"-"$h"\"$NstFldr"-"$i"-"$j -Force
 				#Set-Location .\$NstFldr"-"$i"-"$j
 				$k = 0
 				While ($k -le $FolderDepth) {
 					$k += 1
 					#New-Item -ItemType File -path 
-					New-EmptyFile $TargFldr"\"$tpLevFldr"-"$i"\"$NstFldr"-"$i"-"$j"\"$TstFile"-"$i"-"$j"-"$k".txt" $FolderDepth # -Force
+					New-EmptyFile $TargFldr"\"$tpLevFldr"-"$h"\"$NstFldr"-"$i"-"$j"\"$TstFile"-"$i"-"$j"-"$k".txt" $FolderDepth # -Force
 				}
+				}
+				#>
+																					
+			H =0
+			While ($h -lt $FolderAmount){
+				h++
+				Write-Debug "TargFldr: $TargFldr"
+				New-Item -ItemType Directory -Path $TargFldr"\"$tpLevFldr"-"$h -Force
 			}
+
+
+
+
 		}
 	}
-	END{}
+END{}
 }
 
 function New-EmptyFile {
@@ -145,8 +158,8 @@ function Remove-TestFolders {
 # SIG # Begin signature block
 # MIID7QYJKoZIhvcNAQcCoIID3jCCA9oCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUhgEPaY6JaI1PwKNfz7ji3lIf
-# MxSgggINMIICCTCCAXagAwIBAgIQyWSKL3Rtw7JMh5kRI2JlijAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsMQWRb90dZLZL1RtHivYUv0N
+# PWmgggINMIICCTCCAXagAwIBAgIQyWSKL3Rtw7JMh5kRI2JlijAJBgUrDgMCHQUA
 # MBYxFDASBgNVBAMTC0VyaWtBcm5lc2VuMB4XDTE3MTIyOTA1MDU1NVoXDTM5MTIz
 # MTIzNTk1OVowFjEUMBIGA1UEAxMLRXJpa0FybmVzZW4wgZ8wDQYJKoZIhvcNAQEB
 # BQADgY0AMIGJAoGBAKYEBA0nxXibNWtrLb8GZ/mDFF6I7tG4am2hs2Z7NHYcJPwY
@@ -160,9 +173,9 @@ function Remove-TestFolders {
 # fJ/uMYIBSjCCAUYCAQEwKjAWMRQwEgYDVQQDEwtFcmlrQXJuZXNlbgIQyWSKL3Rt
 # w7JMh5kRI2JlijAJBgUrDgMCGgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKA
 # ADAZBgkqhkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYK
-# KwYBBAGCNwIBFTAjBgkqhkiG9w0BCQQxFgQUhdSPgcEmb/hiNfCM3I2q2vkiWmEw
-# DQYJKoZIhvcNAQEBBQAEgYCGryE8bsJ6fAoOq2ZmvxKnqsmaQjWJRWj0Z0BMvK5T
-# eM6J7d24x38h9z5kuLLpyazzYHRhzMhwQ9mcipVuv4LNdYrOpQ37ulKy01dtGBln
-# 2TwlkGUO26hs84B4NqdNeK0kjdo/00jMCejOYgXNWlMylldTZTg/QFpIDh39y7AZ
-# 4A==
+# KwYBBAGCNwIBFTAjBgkqhkiG9w0BCQQxFgQUm9PkYqQwGYpxmdBc9ctk5coerNMw
+# DQYJKoZIhvcNAQEBBQAEgYCTO41BCJNhyWTAmr+4TlcmjN5PkwvOWmpsON+EfjvJ
+# fsvD15N9l3fZ0dL3bLIiF8iV+ZaufNoSGFCQAmL0iM4PM4zSzAbcTJhmmOTQ5D0i
+# EzK3Wyr08fCWDOMRuRH4EPZYrLDBFVF6R/bpjiIOdhTdCsrOJ/W9OxCcb+1Cza0p
+# lw==
 # SIG # End signature block
