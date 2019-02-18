@@ -18,22 +18,6 @@ Put some notes here.
 
 .LINK
 
-C:Temp\
-├───101
-│   ├───TopLev-1
-│   │   ├───NestFoldr-1-1
-│   │   ├───NestFoldr-1-2
-│   │   └───NestFoldr-1-3
-│   ├───TopLev-2
-│   │   ├───NestFoldr-2-1
-│   │   ├───NestFoldr-2-2
-│   │   └───NestFoldr-2-3
-│   └───TopLev-3
-│       ├───NestFoldr-3-1
-│       ├───NestFoldr-3-2
-│       └───NestFoldr-
-
-
 function test-set {
     [CmdletBinding(DefaultParameterSetName = 3)]
     param(
@@ -50,23 +34,23 @@ function test-set {
 }
 #>
 
-function global:ADD-TestFolders{
+function script:ADD-TestFolders{
 
 [CmdletBinding(
-    DefaultParameterSetName = "TargetFolder", 
-    SupportsShouldProcess = $True)]
+    DefaultParameterSetName = 'TargetFolder', 
+    SupportsShouldProcess)]
 
 param(
     [Int]$FolderDepth = 3,
-    [STRING]$TargFldr = "c:\Temp\NestedFolders",
-    [STRING]$tpLevFldr = "TopLev",
-    [STRING]$NstFldr = "NestFoldr",
-    [STRING]$TstFile = "TestFile"
+    [STRING]$TargFldr = "$env:HOMEDRIVE\Temp\NestedFolders",
+    [STRING]$tpLevFldr = 'TopLev',
+    [STRING]$NstFldr = 'NestFoldr',
+    [STRING]$TstFile = 'TestFile'
     )
 
-    WRITE-DEBUG "`$TargFldr: $TargFldr"
-    WRITE-DEBUG "`$tpLevFldr: $tpLevFldr"
-    WRITE-DEBUG "`$NstFldr: $NstFldr"
+    WRITE-DEBUG -Message ("$TargFldr: {0}" -f $TargFldr)
+    WRITE-DEBUG -Message ("$tpLevFldr: {0}" -f $tpLevFldr)
+    WRITE-DEBUG -Message ("$NstFldr: {0}" -f $NstFldr)
 
 
     <#
@@ -92,7 +76,7 @@ param(
   Bar is: '{1}'
   -TargFldr present: {2}
   FilePath: {3}
-"@ -f $PSCmdlet.ParameterSetName, $FolderDepth, $TargFldr.IsPresent, $FilePath
+"@ -f $PSCmdlet.ParameterSetName, $FolderDepth, $TargFldr.IsPresent
 
 
 # PowerShell Nested Folders
@@ -104,15 +88,15 @@ param(
 #$TstFile = "TestFile"
 $i = 0
 
-if(!(Test-Path $TargFldr)){
+if(!(Test-Path -Path $TargFldr)){
     New-Item -ItemType Directory -Path $TargFldr -Force
     }
 
-Set-Location $TargFldr
+Set-Location -Path $TargFldr
 
 While ($i -le $FolderDepth) {
 $i +=1
-Set-Location $TargFldr
+Set-Location -Path $TargFldr
 New-Item -ItemType Directory -Path $TargFldr"\"$tpLevFldr"-"$i -Force
 #Set-Location .\$tpLevFldr"-"$i
 $j=0
@@ -131,9 +115,9 @@ While ($j -le $FolderDepth) {
 }
 
 
-function delfold (){
+function script:delfold (){
 $limit = (Get-Date).AddDays(-0)
-$path = "C:\Temp\foldtest"
+$path = "$env:HOMEDRIVE\Temp\foldtest"
 
 # Delete files older than the $limit.
 Get-ChildItem -Path $path -Recurse -Force | Where-Object { !$_.PSIsContainer -and $_.CreationTime -lt $limit } | Remove-Item -Force
