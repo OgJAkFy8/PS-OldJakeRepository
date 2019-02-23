@@ -1,7 +1,7 @@
 ﻿. .\Variables.ps1
 
 
-####   EVENT LOG ESTING ######
+####   EVENT LOG TESTING ######
 
 #  Test to see if the source is on the computer
 [System.Diagnostics.EventLog]::Exists("PS Test Log") # Tests for the actual log
