@@ -16,22 +16,22 @@ $Array = @();
 
 Measure-Command
 {
-for($i = 0; $i -lt 10000; $i++)
-{
-$null = $ArrayList.Add("Adding item $i")
-}
+	for($i = 0; $i -lt 10000; $i++)
+	{
+		$null = $ArrayList.Add("Adding item $i")
+	}
 };
 Measure-Command
 {
-for($i = 0; $i -lt 10000; $i++)
-{
-$Array += "Adding item $i"
-}
+	for($i = 0; $i -lt 10000; $i++)
+	{
+		$Array += "Adding item $i"
+	}
 };
 
 
 ###########################
-	
+
 
 #Have you tried changing the SelectionMode attribute to "One"?
 
@@ -55,54 +55,54 @@ $form.Panel1.Controls.Add($radioButton2)
 
 $Services = get-wmiobject win32_service -ErrorAction SilentlyContinue #| Where-Object {$_.DisplayName -like "Win*" }
 
-   $myCol = @()
-   Foreach ($service in $Services){
-      $MyDetails = "" | select-Object Name, State, StartMode, Health
-      If ($service.StartMode -eq "Auto")
-      {
-         if ($service.State -eq "Stopped")
-         {
-            $MyDetails.Name = $service.Displayname
-            $MyDetails.State = $service.State
-            $MyDetails.StartMode = $service.StartMode
-            $MyDetails.Health = "Unexpected State"
-         }
-      }
-      If ($service.StartMode -eq "Auto")
-      {
-         if ($service.State -eq "Running")
-         {
-            $MyDetails.Name = $service.Displayname
-            $MyDetails.State = $service.State
-            $MyDetails.StartMode = $service.StartMode
-            $MyDetails.Health = "OK"
-         }
-      }
-      If ($service.StartMode -eq "Disabled")
-      {
-         If ($service.State -eq "Running")
-         {
-            $MyDetails.Name = $service.Displayname
-            $MyDetails.State = $service.State
-            $MyDetails.StartMode = $service.StartMode
-            $MyDetails.Health = "Unexpected State"
-         }
-      }
-      If ($service.StartMode -eq "Disabled")
-      {
-         if ($service.State -eq "Stopped")
-         {
-            $MyDetails.Name = $service.Displayname
-            $MyDetails.State = $service.State
-            $MyDetails.StartMode = $service.StartMode
-            $MyDetails.Health = "OK"
-         }
-      }
-      $myCol += $MyDetails
-   }
+$myCol = @()
+Foreach ($service in $Services){
+	$MyDetails = "" | select-Object Name, State, StartMode, Health
+	If ($service.StartMode -eq "Auto")
+	{
+		if ($service.State -eq "Stopped")
+		{
+			$MyDetails.Name = $service.Displayname
+			$MyDetails.State = $service.State
+			$MyDetails.StartMode = $service.StartMode
+			$MyDetails.Health = "Unexpected State"
+		}
+	}
+	If ($service.StartMode -eq "Auto")
+	{
+		if ($service.State -eq "Running")
+		{
+			$MyDetails.Name = $service.Displayname
+			$MyDetails.State = $service.State
+			$MyDetails.StartMode = $service.StartMode
+			$MyDetails.Health = "OK"
+		}
+	}
+	If ($service.StartMode -eq "Disabled")
+	{
+		If ($service.State -eq "Running")
+		{
+			$MyDetails.Name = $service.Displayname
+			$MyDetails.State = $service.State
+			$MyDetails.StartMode = $service.StartMode
+			$MyDetails.Health = "Unexpected State"
+		}
+	}
+	If ($service.StartMode -eq "Disabled")
+	{
+		if ($service.State -eq "Stopped")
+		{
+			$MyDetails.Name = $service.Displayname
+			$MyDetails.State = $service.State
+			$MyDetails.StartMode = $service.StartMode
+			$MyDetails.Health = "OK"
+		}
+	}
+	$myCol += $MyDetails
+}
 
-   $Results = $MyCol | Where-Object {$_.Name -ne $null -and $_.Health -ne "OK"}
-   $Results
+$Results = $MyCol | Where-Object {$_.Name -ne $null -and $_.Health -ne "OK"}
+$Results
 
 }
 
@@ -112,14 +112,14 @@ $Services = get-wmiobject win32_service -ErrorAction SilentlyContinue #| Where-O
 Clear-Host
 $Disk = Get-WmiObject win32_logicaldisk
 Foreach ($Drive in $Disk) {
-Switch (14) {
-1{ $Drive.DeviceID + " Unknown" }
-2{ $Drive.DeviceID + " Floppy or Removable Drive" }
-3{ $Drive.DeviceID + " Hard Drive" }
-14{ $Drive.DeviceID + " Network Drive" }
-5{ $Drive.DeviceID + " CD" }
-6{ $Drive.DeviceID + " RAM Disk" }
-    }
+	Switch (14) {
+		1{ $Drive.DeviceID + " Unknown" }
+		2{ $Drive.DeviceID + " Floppy or Removable Drive" }
+		3{ $Drive.DeviceID + " Hard Drive" }
+		14{ $Drive.DeviceID + " Network Drive" }
+		5{ $Drive.DeviceID + " CD" }
+		6{ $Drive.DeviceID + " RAM Disk" }
+	}
 }
 
 
