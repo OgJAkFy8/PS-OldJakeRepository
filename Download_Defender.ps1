@@ -35,12 +35,12 @@ Function Get-DefenderDownload
   [CmdletBinding()]
   param
   (
-    [Object]$baseNAME,
+    [Parameter(Mandatory)]$baseNAME,
     # $Site = 'http://go.microsoft.com/fwlink/?LinkID=87341',
-    $Site = 'https://github.com/KnarrStudio/PS-Scripts/archive/master.zip',
-    $FileName = 'master',
-    $FileExt = 'zip',
-    $FileLocal = "$env:HOMEDRIVE\temp\Defender"
+    [string]$Site = 'https://github.com/KnarrStudio/PS-Scripts/archive/master.zip',
+    [string]$FileName = 'master',
+    [string]$FileExt = 'zip',
+    [string]$FileLocal = "$env:HOMEDRIVE\temp\Defender"
   )
   Enable-Tls -Tls12
 
@@ -48,10 +48,9 @@ Function Get-DefenderDownload
   #=======================
   Function Get-tdFileName
   {
-    [CmdletBinding()]
     param
     (
-      [Object]$baseNAME
+      [Parameter(Mandatory)]$baseNAME
     )
     $t = Get-Date -UFormat '%d%H%M%S'
     return  $baseNAME + '_' + $t + '.bkp'
@@ -59,10 +58,9 @@ Function Get-DefenderDownload
 
   Function Get-verFileName
   {
-    [CmdletBinding()]
     param
     (
-      [Object]$baseNAME
+      [Parameter(Mandatory)]$baseNAME
     )
     $t = (Get-Item -Path $baseNAME).VersionInfo.FileVersion
     return  $baseNAME + '_' + $t + '.bkp'
@@ -71,10 +69,9 @@ Function Get-DefenderDownload
 
   Function Get-tstFile
   {
-    [CmdletBinding()]
     param
     (
-      [Object]$TestFileName
+      [Parameter(Mandatory)]$TestFileName
     )
   }
 
