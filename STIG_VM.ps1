@@ -100,3 +100,8 @@
 END{}
 
 Set-VmStigSettings -VmServerName Foo,bar
+
+
+
+# https://www.vmware.com/files/xls/vSphere_6_0_Hardening_Guide_GA_15_Jun_2015.xls
+
