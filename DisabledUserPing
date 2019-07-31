@@ -1,0 +1,67 @@
+#Requires -version 3.0 
+#Requires -Module ActiveDirectory
+
+$ADSearchBase = 'OU=SOUTH,OU=OMC,OU=OSD,OU=Enterprise Tenants,DC=usr,DC=osd,DC=mil'
+$ReportFolder = '\\rsrcngmfs02\OMC-CA_Org\OMC-S\IT\Reports\DisabledUsers'
+$DiabledCount = 0
+$DateNow = Get-Date -UFormat %Y%m%d-%H%M
+$ReportFile = (('{0}\{1}-Report.csv' -f $ReportFolder, $DateNow))
+$AdUserSiteList = (('{0}\{1}-ComputerList.csv' -f $ReportFolder, $DateNow))
+$i = 1
+
+if(!(Test-Path -Path $ReportFolder))
+{
+  New-Item -Path $ReportFolder -ItemType Directory
+}
+
+Search-ADAccount –AccountDisabled –UsersOnly –SearchBase $ADSearchBase | 
+Select-Object -Property Name, LastLogonDate, SamAccountName  |
+Sort-Object -Property LastLogonDate -Descending |
+Export-Csv -Path $AdUserSiteList -NoTypeInformation
+
+$AdUserList = Import-Csv -Path $AdUserSiteList # -Header Name
+$TotalAdUsers = $AdUserList.count # -1
+
+if($TotalAdUsers -gt 0)
+{
+  foreach($OneAdUser in $AdUserList)
+  {
+    #$AdUserName = $OneAdUser.Name
+    #if ($AdUserName -ne 'Name')
+    #{
+      Write-Progress -Activity ('Testing {0}' -f $AdUserName) -PercentComplete ($i / $TotalAdUsers*100)
+      $i++
+
+
+      ##########################################################
+      
+      Function $Disabled {
+
+        if($AdUserName.lastlogondate -gt $(get-date).AddDays(-30)){
+        return
+      }
+      }
+      ##########################################################
+      if($Ping -ne 'True')
+      {
+        $DiabledCount ++
+        $AdUserProperties = Get-ADComputer -Identity $AdUserName -Properties * | Select-Object -Property Name, LastLogonDate, Description
+        if($DiabledCount -eq 1)
+        {
+          $AdUserProperties | Export-Csv -Path $ReportFile -NoClobber -NoTypeInformation
+        }
+        else
+        {
+          $AdUserProperties | Export-Csv -Path $ReportFile -NoTypeInformation -Append
+        }
+      }
+    }
+  }
+#}
+
+
+Write-Host -Object ('Total workstations found in AD: {0}' -f $TotalAdUsers) -ForegroundColor Green
+Write-Host -Object ('Total workstations not responding: {0}' -f $DiabledCount) -ForegroundColor Red
+Write-Host -Object "This test was run by $env:USERNAME from $env:COMPUTERNAME"
+Write-Host -Object ('You can find the full report at: {0}' -f $ReportFile)
+
