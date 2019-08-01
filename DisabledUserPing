@@ -2,8 +2,8 @@
 #Requires -Module ActiveDirectory
 
 
-$ADSearchBase = 'OU=SOUTH,OU=OMC,OU=OSD,OU=Enterprise Tenants,DC=usr,DC=osd,DC=mil'
-$ReportFolder = '\\rsrcngmfs02\OMC-CA_Org\OMC-S\IT\Reports\DisabledUsers'
+$ADSearchBase = 'OU=SOUTH'
+$ReportFolder = '\\IT\Reports\DisabledUsers'
 $DiabledCount = 0
 $DateNow = Get-Date -UFormat %Y%m%d-%H%M
 $ReportFile = (('{0}\{1}-Report.csv' -f $ReportFolder, $DateNow))
@@ -172,5 +172,26 @@ ForEach ($Item in $Users)
   Write-Output -InputObject "$($Item.Username) - Deleted"
 }
 
+___________________________
+
+
+
+# Get all users, computers, and service accounts that are disabled
+Search-ADAccount -SearchBase $ADSearchBase -AccountDisabled | Format-Table -Property Name, ObjectClass -AutoSize
+
+# Get all users that are disabled
+Search-ADAccount -SearchBase $ADSearchBase -AccountDisabled -UsersOnly | Format-Table -Property Name, ObjectClass -AutoSize
+
+# Get all users, computers, and service accounts that are expired
+Search-ADAccount -SearchBase $ADSearchBase -AccountExpired | Format-Table -Property Name, ObjectClass -AutoSize
+
+# Get all users, computers, and service accounts that will expire in a specified time
+Search-ADAccount -SearchBase $ADSearchBase -AccountExpiring -TimeSpan 180.00:00:00 | Format-Table -Property Name, ObjectClass -AutoSize
+
+# Get all accounts that have expired
+Search-ADAccount -SearchBase $ADSearchBase -PasswordExpired | Format-Table -Property Name, ObjectClass -AutoSize
+
+# Get all accounts that are locked out
+Search-ADAccount -SearchBase $ADSearchBase -LockedOut | Format-Table -Property Name, ObjectClass -AutoSize
 
 #>
