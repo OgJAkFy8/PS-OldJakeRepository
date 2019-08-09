@@ -28,7 +28,7 @@ Versions
  
 #############################################>
 
-#Connect-viserver -Server 214.54.192.21
+#Connect-viserver -Server 192.168.1.21
 
 get-datastore | ft Name -AutoSize
 
