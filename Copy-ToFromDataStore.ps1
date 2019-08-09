@@ -3,7 +3,6 @@ Script Name: DataStoreCopy.ps1
 Author Name: Erik Arnesen
 Version : 1.0
 Mod Date: 9/14/2017
-Contact : 836-9087
 Copy of this file is located in S:\Scripts
  
 .SYNOPSIS
