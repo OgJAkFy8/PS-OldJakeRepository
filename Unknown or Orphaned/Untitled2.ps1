@@ -1,4 +1,5 @@
-﻿Get-ADComputer -filter {samAccountName -like "D114*"} | foreach {Get-WmiObject -Class Win32_ComputerSystem -ComputerName $_.Name } | where {$_.UserName -eq "Resource\brushde" } | Format-Table Name, UserName
+﻿#requires -Version 2.0
+Get-ADComputer -filter {samAccountName -like "D114*"} | foreach {Get-WmiObject -Class Win32_ComputerSystem -ComputerName $_.Name } | where {$_.UserName -eq "Resource\brushde" } | Format-Table Name, UserName
 Get-ADComputer -filter {samAccountName -like "D114*"} | foreach {Get-WmiObject -Class Win32_ComputerSystem -ComputerName $_.Name } | where {($_.PrimaryOwnerName -ne "OSD-CIO") -or ($_.PrimaryOwnerName -ne "EITSD")} | Format-Table Name,PrimaryOwnerName -a
 
                                                                                                                                   
@@ -9,9 +10,11 @@ $UserInfo[2]=$env:HOMESHARE
 $UserInfo[3]=$env:LOGONSERVER
 $UserInfo[4]=$env:USERDOMAIN 
 
+	
+Install-Module Microsoft.PowerShell.GraphicalTools
 
 Get-Childitem -Path Env:* | GridView -Title "Session Info" $UserInfo[0..4] | Out-GridView
-Get-Childitem -Path Env:* | ft $env:COMPUTERNAME,USERNAME,HOMESHARE
+Get-Childitem -Path Env:* | select $env:COMPUTERNAME,USERNAME,HOMESHARE
 
 <# Example to show the InputBox on button click and display entered text #>
  

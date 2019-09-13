@@ -1,5 +1,19 @@
 ﻿#requires -Version 4.0 -Modules PSDesiredStateConfiguration
 
+<#
+Registry [string] #ResourceName
+{
+    Key = [string]
+    ValueName = [string]
+    [ Ensure = [string] { Present | Absent }  ]
+    [ Force =  [bool]   ]
+    [ Hex = [bool] ]
+    [ DependsOn = [string[]] ]
+    [ ValueData = [string[]] ]
+    [ ValueType = [string] { Binary | Dword | ExpandString | MultiString | Qword | String }  ]
+}
+#>
+
 Configuration ThisCanBeAnyMeaningfulName {
   Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
   
