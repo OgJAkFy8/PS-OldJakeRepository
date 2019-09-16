@@ -1,3 +1,4 @@
+#requires -Version 3.0
 <#
     .SYNOPSIS
     Exports files and keeps a running size log
@@ -12,7 +13,7 @@
     File Name      : Export-DBBackups.ps1
     Authors        : Alex F. (https://github.com/afflom)
     : Erik A. (https://github.com/OgJAkFy8)
-    Prerequisite   : PowerShell V2 over Vista and upper.
+    Prerequisite   : Requires -Version 3.0
     Copyright 2018 - Alex F. & Erik A.
 
     .LINK
@@ -24,44 +25,77 @@ function New-TimedStampFileName
   <#
       .SYNOPSIS
       Creates a file where a time stamp in the name is needed
+
       .DESCRIPTION
-      Allows you to create a file with a time stamp.  You provide the base name, extension, date format and it should do the rest.
+      Allows you to create a file with a time stamp.  You provide the base name, extension, date format and it should do the rest. It should be setup to be a plug-n-play function that can be used in or out of another script.
+    
       .PARAMETER baseNAME
-      Describe parameter -baseNAME.
-      .PARAMETER tailNAME
-      Describe parameter -tailNAME.
+      This is the primary name of the file.  It will be followed by the date/time stamp.
+
+      .PARAMETER FileType
+      The extension. ig. csv, txt, log
+
       .PARAMETER StampFormat
       Describe parameter -StampFormat.
+
       .EXAMPLE
-      New-TimedStampFileName -baseNAME TestFile -tailNAME ext -StampFormat 2
-      This creates a file TestFile-20170316.ext 
+      New-TimedStampFileName -baseNAME TestFile -FileType log -StampFormat 2
+      This creates a file TestFile-20170316.log
+
       .NOTES
-      This should be written in a way that will allow you to incert it into your script and use as a function
+      StampFormats:
+      1: YYMMDDHHmm  (Two digit year followed by two digit month day hours minutes.  This is good for the report that runs more than once a day)  -example 1703162145
+      2: YYYYMMDD  (Four digit year two digit month day.  This is for the once a day report)  -example 20170316 
+      3: jjjHHmmss (Julian day then hours minutes seconds.  Use this when you are testing, troubleshooting or creating.  You won't have to worry about overwrite or append errors)  -example 160214855 
+      4: YYYY-MM-DDTHH.mm.ss.ms-UTC (Four digit year two digit month and day "T" starts the time section two digit hour minute seconds then milliseconds finish with an hours from UTC -example 2019-04-24T07:23:51.3195398-04:00
+      Old #4: YY/MM/DD_HH.mm  (Two digit year/month/day _ Hours:Minutes.  This can only be used inside a log file)  -example 17/03/16_21:52
+
       .INPUTS
       Any authorized file name for the base and an extension that has some value to you.
+
       .OUTPUTS
-      Filename-20181005.bat
+      example output - Filename-20181005.bat
   #>
+
   param
   (
-    [Parameter(Mandatory,HelpMessage='Prefix of file or log name')]
-    [string]$baseNAME,
-    [Parameter(Mandatory,HelpMessage='Extention of file.  txt, csv, log')]
-    [string]$Extension,
-    [Parameter(Mandatory,HelpMessage='Formatting Choice 1 to 4')]
+    [Parameter(Mandatory,HelpMessage = 'Prefix of file or log name')]
+    [String]$baseNAME,
+    [Parameter(Mandatory,HelpMessage = 'Extention of file.  txt, csv, log')]
+    [alias('Extension')]
+    [String]$FileType,
+    [Parameter(Mandatory,HelpMessage = 'Formatting Choice 1 to 4')]
     [ValidateRange(1,4)]
     [int]$StampFormat
   )
-  switch ($StampFormat)
-  {
-    1{$t = Get-Date -uformat '%y%m%d%H%M'} # 1703162145 YYMMDDHHmm
-    2{$t = Get-Date -uformat '%Y%m%d'} # 20170316 YYYYMMDD
-    3{$t = Get-Date -uformat '%d%H%M%S'} # 16214855 DDHHmmss
-    4{$t = Get-Date -uformat '%y/%m/%d_%H:%M'} # 17/03/16_21:52
-    default{'No time format selected'}
+
+  switch ($StampFormat){
+    1
+    {
+      $DateStamp = Get-Date -UFormat '%y%m%d%H%M'
+    } # 1703162145 YYMMDDHHmm
+    2
+    {
+      $DateStamp = Get-Date -UFormat '%Y%m%d'
+    } # 20170316 YYYYMMDD
+    3
+    {
+      $DateStamp = Get-Date -UFormat '%j%H%M%S'
+    } # 160214855 jjjHHmmss
+    4
+    {
+      $DateStamp = Get-Date -Format o | ForEach-Object -Process {
+        $_ -replace ':', '.'
+      }
+      #$DateStamp = Get-Date -UFormat '%y/%m/%d_%H.%M' # 17/03/16_21.52
+    } 
+    default
+    {
+      Write-Verbose -Message 'No time format selected'
+    }
   }
-  $TimeStampFileName = $baseNAME+'-'+$t+'.'+$Extension
-  return $TimeStampFileName
+
+  $baseNAME+'-'+$DateStamp+'.'+$FileType
 } # End function New-TimedStampFileName
 # (New-TimedStampFileName -baseNAME 'ExportLog' -Extension csv -StampFormat 2)
 
@@ -104,11 +138,15 @@ function Export-FilesFolders
 {
   [CmdletBinding()]
   param(
-    [string[]]$SourceFolder = "$env:HOMEDRIVE\temp\BackupSource",
+    [Parameter(Mandatory)]
+    [string]$SourceFolder = "$env:HOMEDRIVE\temp\BackupSource",
     [string]$FileType = $null,
     [string]$DestinationFolder = "$env:HOMEDRIVE\temp\BackupDestination",
     [int]$DaysBack = 5000,
     [string]$LogDestination = "$env:HOMEDRIVE\Temp\Logs",
+    [Parameter(Mandatory,HelpMessage='Get list of installed software by installed date or abc')]
+    [ValidateSet('InstallDate', 'DisplayName','DisplayVersion')] 
+    [String]
     [Switch]$Files,
     [Switch]$Folders,
     [Switch]$Copy,
