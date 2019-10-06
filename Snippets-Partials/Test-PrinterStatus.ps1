@@ -15,22 +15,21 @@ function Test-PrinterStatus
       another example
       can have as many examples as you like
   #>
-  [CmdletBinding()]
   param
   (
-    [Parameter(Mandatory=$false, Position=0)]
+    [Parameter(Mandatory = $true,HelpMessage = 'Add PrintServer name', Position = 0)]
     [string]
-    $PrintServer = 'PrintServer',
+    $PrintServer,
     
-    [Parameter(Mandatory=$false, Position=1)]
+    [Parameter(Mandatory = $true,HelpMessage = '\\NetworkShare\Reports\PrinterStatus or c:\temp',Position = 1)]
     [string]
-    $PingReportFolder = '\\NetworkShare\Reports\PrinterStatus'
+    $PingReportFolder
   )
   
   $BadCount = 0
-  $DateNow = Get-Date -UFormat %Y%m%d-%H%M%S
-  $ReportFile = (('{0}\{1}-PrinterReport.csv' -f $PingReportFolder, $DateNow))
-  $PrinterSiteList = (('{0}\{1}-FullPrinterList.csv' -f $PingReportFolder, $DateNow))
+  $DateStamp = Get-Date -UFormat %Y%m%d-%H%M%S
+  $ReportFile = (('{0}\{1}-PrinterReport.csv' -f $PingReportFolder, $DateStamp))
+  $PrinterSiteList = (('{0}\{1}-FullPrinterList.csv' -f $PingReportFolder, $DateStamp))
   $i = 0
   
   if(!(Test-Path -Path $PingReportFolder))
@@ -52,12 +51,17 @@ function Test-PrinterStatus
       $PrinterName = $OnePrinter.Name
       if ($PrinterName -ne 'Name')
       {
-        $PrinterIpAddress = Get-PrinterPort -ComputerName $PrintServer -Name $PrinterName | Select-Object -ExpandProperty PrinterHostAddress -ErrorAction SilentlyContinue
-        if ($PrinterIpAddress -match '192.')
+        $PrinterIpAddress = Get-PrinterPort -ComputerName $PrintServer -Name $PrinterName | Select-Object -Property PrinterHostAddress -ErrorAction SilentlyContinue
+        if ($PrinterIpAddress)
         {
-          if(-not  $(Test-Connection -ComputerName $PrinterIpAddress -ErrorAction SilentlyContinue -Count 1))
+          $PingPortResult = Test-Connection -ComputerName $PrinterIpAddress -Count 1 -Quiet 
+          if($PingPortResult -eq $false)
           {
             Write-Host ('The printer {0} failed to respond to a ping!  ' -f $PrinterName) -f Red
+          }
+          elseif($PingPortResult -eq $true)
+          {
+            Write-Host ('The printer {0} responded to a ping!  ' -f $PrinterName) -f Green
           }
         }
       }
@@ -81,11 +85,10 @@ function Test-PrinterStatus
     }
   }
   
-  
-  #Clear-Host
-  Write-Host -Object ('Total Printers found: {0}' -f $TotalPrinters) -ForegroundColor Green
-  Write-Host -Object ('Total Printers not in a Normal Status: {0}' -f $BadCount) -ForegroundColor Red
-  Write-Host -Object "This test was run by $env:USERNAME from $env:COMPUTERNAME"
-  Write-Host -Object ('You can find the full report at: {0}' -f $ReportFile)
+  Write-Verbose -Message ('Total Printers found: {0}' -f $TotalPrinters)
+  Write-Verbose -Message ('Total Printers not in a Normal Status: {0}' -f $BadCount)
+  Write-Verbose -Message "This test was run by $env:USERNAME from $env:COMPUTERNAME"
+  Write-Verbose -Message ('You can find the full report at: {0}' -f $ReportFile)
 }
+
 
