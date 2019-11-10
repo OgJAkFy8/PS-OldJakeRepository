@@ -5,60 +5,61 @@ function Test-ServerRolePortGroup
   <#
       .SYNOPSIS
       This function tests for open TCP/UDP ports by server role.
+
       .DESCRIPTION
-      This function tests for all the approprite TCP/UDP ports by server role so you don't have
-      to memorize or look up all of the ports that need to be tested for every time
-      you want to verify remote connectivity on a specific server role.
+      This function tests for all the approprite TCP/UDP ports by server role so you don't have to memorize or look up all of the ports that need to be tested for every time you want to verify remote connectivity on a specific server role.
+
       .NOTES
       Link port references:
       http://technet.microsoft.com/en-us/library/dd772723(v=ws.10).aspx
       http://en.wikipedia.org/wiki/Server_Message_Block
       http://technet.microsoft.com/en-us/library/cc940063.aspx
+
       .PARAMETER Computername
       One or more remote, comma-separated computer names
+
       .PARAMETER ServerRole
-      The services on the computer that you'd like to find open ports for. This can be
-      common services like WinRm, Smb, Dns, Active Directory and NetBIOS
+      The services on the computer that you'd like to find open ports for. This can be common services like WinRm, Smb, Dns, Active Directory and NetBIOS
+
       .EXAMPLE
       PS> Test-ServerRolePortGroup -Computername 'LABDC','LABDC2' -ServerRole NetBIOS,WinRm,Dns
 		
-      This example tests the network ports necessary for NetBIOS, WinRm and Dns
-      to operate on the servers LABDC and LABDC2.
+      This example tests the network ports necessary for NetBIOS, WinRm and Dns to operate on the servers LABDC and LABDC2.
   #>
 	
   [CmdletBinding()]
   [OutputType([Management.Automation.PSCustomObject])]
   param (
-    [Parameter(Mandatory,HelpMessage='At least one server')]
+    [Parameter(Mandatory,HelpMessage = 'At least one server')]
     [ValidateScript({
           Test-Connection -ComputerName $_ -Count 1 -Quiet
     })]
     [string[]]$Computername,
-    [Parameter(Mandatory,HelpMessage="'WinRm','Smb','Dns','ActiveDirectoryGeneral','ActiveDirectoryGlobalCatalog', etc. etc.")]
+    [Parameter(Mandatory,HelpMessage = "'WinRm','Smb','Dns','ActiveDirectoryGeneral','ActiveDirectoryGlobalCatalog', etc. etc.")]
     [ValidateSet('WinRm','Smb','Dns','ActiveDirectoryGeneral','ActiveDirectoryGlobalCatalog','NetBios')]
     [string[]]$ServerRole
   )
   begin {
     $PortGroups = @{
-      'WinRm' = @{
+      'WinRm'                      = @{
         'TCP' = 5985
       }
-      'Smb' = @{
+      'Smb'                        = @{
         'TCP' = 445
         'UDP' = 445
       }
-      'Dns' = @{
+      'Dns'                        = @{
         'TCP' = 53
         'UDP' = 53
       }
-      'ActiveDirectoryGeneral' = @{
+      'ActiveDirectoryGeneral'     = @{
         'TCP' = 25, 88, 389, 464, 636, 5722, 9389
         'UDP' = 88, 123, 389, 464
       }
       'ActiveDirectoryGlobalCatalog' = @{
         'TCP' = 3268, 3269
       }
-      'NetBios' = @{
+      'NetBios'                    = @{
         'TCP' = 135, 137, 138, 139
         'UDP' = 137, 138, 139
       }
@@ -71,7 +72,7 @@ function Test-ServerRolePortGroup
       try 
       {
         $TestPortGroups = $PortGroups.GetEnumerator() | Where-Object -FilterScript {
-          $ServerRole -contains $_.Key 
+          $ServerRole -contains $_.Key
         }
         Write-Verbose -Message ("Found '{0}' port group(s) to test" -f $TestPortGroups.Count)
         foreach ($PortGroup in $TestPortGroups) 
@@ -82,7 +83,7 @@ function Test-ServerRolePortGroup
           {
             $Protocol = $Value.Key
             $Ports = $Value.Value
-            $TestResult = Test-Port -ComputerName $Computer -Protocol $Protocol -Port $Ports
+            $TestResult = Test-Port -Computername $Computer -Protocol $Protocol -Port $Ports
             $TestResult | Add-Member -MemberType 'NoteProperty' -Name 'PortSet' -Value $PortGroupName
             $TestResult
           }
@@ -90,7 +91,7 @@ function Test-ServerRolePortGroup
       }
       catch 
       {
-        Write-host -Message ('{0} - Computer: {1} - Error: {2} - Line Number: {3}' -f $MyInvocation.MyCommand.Name, $Computer, $_.Exception.Message, $_.InvocationInfo.ScriptLineNumber)
+        Write-Host -Message ('{0} - Computer: {1} - Error: {2} - Line Number: {3}' -f $MyInvocation.MyCommand.Name, $Computer, $_.Exception.Message, $_.InvocationInfo.ScriptLineNumber)
         $false
       }
     }
@@ -129,11 +130,11 @@ function Test-Port
   [CmdletBinding(DefaultParameterSetName = 'TCP')]
   [OutputType([Management.Automation.PSCustomObject])]
   param (
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory,HelpMessage = 'One or many computer names')]
     [string[]]$Computername,
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory,HelpMessage = '80, 443, 53 etc')]
     [int[]]$Port,
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory,HelpMessage = 'Either TCP or UDP')]
     [ValidateSet('TCP', 'UDP')]
     [string]$Protocol,
     [Parameter(ParameterSetName = 'TCP')]
