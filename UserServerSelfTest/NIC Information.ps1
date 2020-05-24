@@ -123,7 +123,8 @@ function Get-NICinformation
     
   )
   Write-Host ("Gathering the information on your NIC's") -ForegroundColor Yellow
-  $NICs = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE -ComputerName $Workstation -ErrorAction Stop | Select-Object -Property * -ExcludeProperty IPX*, WINS*
+  $NICs = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE -ComputerName $Workstation -ErrorAction Stop | Select-Object -Property * -ExcludeProperty IPX*, WINS* | 
+  where Description -NotMatch 'VMnet'
   
   foreach($NIC in $NICs)
   {

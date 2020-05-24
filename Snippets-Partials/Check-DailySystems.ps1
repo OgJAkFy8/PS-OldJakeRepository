@@ -36,9 +36,10 @@
 Import-Module -Name ActiveDirectory
 
 # Custom function to scan specified AD domain and collect data
-function Get-DomainInfo {
+function Get-DomainInfo 
+{
   param(
-    [Parameter(Position=0,HelpMessage='Enter the domain name ex: unc.edu', Mandatory)]
+    [Parameter(Position = 0,HelpMessage = 'Enter the domain name ex: unc.edu', Mandatory)]
     [string]$DomainName
   )
   begin {
@@ -65,22 +66,23 @@ function Get-DomainInfo {
 
     $FGPPNo = 'feature not supported'
     
-    $DomainControllers =  Get-ADDomainController -Server $domain
+    $DomainControllers = Get-ADDomainController -Server $domain
     
   }
   process {
     # Get Domain Controller with at least Windows Server 2008 R2
-    $DCListFiltered = Get-ADDomainController -Server $domain -Filter { operatingSystem -like 'Windows Server 2008 R2*' -or operatingSystem -like 'Windows Server 2012*' -or operatingSystem -like 'Windows Server Technical Preview'  } | Select-Object -Property * -ExpandProperty Name
-    $DCListFiltered | ForEach-Object{ $DCListFilteredIndex = $DCListFilteredIndex+1 }
+    $DCListFiltered = Get-ADDomainController -Server $domain -Filter {
+      operatingSystem -like 'Windows Server 2008 R2*' -or operatingSystem -like 'Windows Server 2012*' -or operatingSystem -like 'Windows Server Technical Preview'  
+    } | Select-Object -Property * -ExpandProperty Name
+    $DCListFiltered | ForEach-Object -Process {
+      $DCListFilteredIndex = $DCListFilteredIndex+1 
+    }
   }
 }
 
 end {
   Export-ModuleMember -Function Get-Foo
 }
-
-
-
 
 
 <# Section - Drive Space #>

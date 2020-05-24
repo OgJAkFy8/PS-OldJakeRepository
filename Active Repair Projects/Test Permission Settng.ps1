@@ -1,4 +1,5 @@
-﻿
+﻿#requires -Version 1.0
+
 function Set-DenyPermissions 
 {
   [CmdletBinding()]
@@ -25,9 +26,9 @@ function Set-ReadPermissions
 
   $Acl = Get-Acl -Path $FileName
 
-    $AccessRule = New-Object  -TypeName system.security.accesscontrol.filesystemaccessrule -ArgumentList ($UserName, 'ExecuteFile', 'Allow')
+  $AccessRule = New-Object  -TypeName system.security.accesscontrol.filesystemaccessrule -ArgumentList ($UserName, 'ExecuteFile', 'Allow')
     
-    $Acl.SetAccessRule($AccessRule)
+  $Acl.SetAccessRule($AccessRule)
   
 
 
@@ -43,15 +44,17 @@ function Remove-Permissions
   )
 
   $Acl = Get-Acl -Path $FileName
-Foreach ($AccessRule in $Acl) {
-$Acl.RemoveAccessRule($AccessRule)}
+  Foreach ($AccessRule in $Acl) 
+  {
     $Acl.RemoveAccessRule($AccessRule)
   }
-      $AccessRule = New-Object  -TypeName system.security.accesscontrol.filesystemaccessrule -ArgumentList ('BUILTIN\Administrators', 'FullControl','ContainerInherit, ObjectInherit', 'Allow')
+  $Acl.RemoveAccessRule($AccessRule)
+}
+$AccessRule = New-Object  -TypeName system.security.accesscontrol.filesystemaccessrule -ArgumentList ('BUILTIN\Administrators', 'FullControl', 'ContainerInherit, ObjectInherit', 'Allow')
     
-    $Acl.SetAccessRule($AccessRule)
+$Acl.SetAccessRule($AccessRule)
 
-  Set-Acl -Path $FileName -AclObject $Acl
+Set-Acl -Path $FileName -AclObject $Acl
 
 
 
@@ -60,7 +63,8 @@ $Acl.RemoveAccessRule($AccessRule)}
 # $Files = "C:\Windows\INF\usbstor.pnf","C:\Windows\INF\usbstor.inf",$filename = 'C:\DirectoryEditor'
 $Files = 'C:\Temp\USBSTOR\TestACL.txt', 'C:\OCADirectory\Editor', 'C:\OCADirectory\Transporter'
 
-Foreach($filename in $Files){
+Foreach($FileName in $Files)
+{
   <#
       Editor - Allow / ReadWrite to the Editor Directory.
       Editor - Allow / Write to the Transporter Directory.
