@@ -124,14 +124,27 @@ Function Show-DynamicMenu
   
   while($ans -notin 0..$folderCount)
  
+<<<<<<< HEAD
   $script:selection = $menu.Item($ans)
   
   #Return $selection
+=======
+  $selection = $menu.Item($ans)
+  
+  Return $selection
+>>>>>>> 74882c3c79fac3f05b8bc84fc005460e7c679f72
 }
 
 Clear-Host
 Write-Verbose -Message 'Show Dynamic Menu'
+<<<<<<< HEAD
 Show-DynamicMenu -Files -Verbose
 
 # Visual output for Testing
 Write-Output -InputObject ('You selected: {0}' -f $selection)
+=======
+Show-DynamicMenu  -Verbose
+
+# Visual output for Testing
+Write-Output -InputObject ('You selected: {0}' -f $selection)
+>>>>>>> 74882c3c79fac3f05b8bc84fc005460e7c679f72
