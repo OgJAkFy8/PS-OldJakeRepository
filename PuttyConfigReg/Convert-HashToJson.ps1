@@ -33,7 +33,7 @@ $ThemeHash = @{
   }
   Lonnie  = @{
     TxtColor       = '0,255,255'
-    BkColor        = '255,0,255-lonnie'
+    BkColor        = '255,0,255'
     CrsrColor      = '255,0,0'
     TermWidth      = 100
     Beep           = 2
@@ -45,8 +45,8 @@ $ThemeHash = @{
     BkColor        = $RgbColor.Black
     CrsrColor      = $RgbColor.Gray
     TermWidth      = 80
-    Beep           = 2
-    BeepInd        = 1
+    Beep           = 0
+    BeepInd        = 0
     ThemeSelection = 'Default'
   }
   SIPR    = @{
@@ -71,5 +71,5 @@ $ThemeHash = @{
 
 $ThemeHash |
 ConvertTo-Json -Depth 5 |
-Out-File '.\Themes.json'
+Out-File -FilePath '.\Themes.json'
 

@@ -1,31 +1,112 @@
-﻿$SwitchImport = (Import-Csv -Path '.\Network-Information.csv' ) | Where-Object -FilterScript {
-  $_.Enclave -match 'OFFICE'
-}
-
-$PuttyRegBase = '.\PuttyRegBase)'
-<#$PuttyReg = $PuttyRegBase.Replace('.',('_{0}.' -f $(Get-Date -UFormat %j%S)))
-
-#>if(Test-Path $PuttyRegBase)
+﻿function Add-PuttySessions
 {
-  Copy-Item $PuttyRegBase -Destination $PuttyReg -Force
-}
-Else
-{
-  $PuttyReg = New-Item -Path '.\PuttyReg.reg' -ItemType File -Force
-}
+  <#
+      .SYNOPSIS
+      Automates the build-out of all your Putty sessions.  
+      
+      .DESCRIPTION
+      Builds out your PuTTY console sessions
+      All you need to do is supply your hostnames and ipaddresses.  
+      Normally this is done by one by one, but this makes it easier to modify or rebuild your sessions
 
-[String]$($PuttyReg.Replace('.',('_{0}.' -f $(Get-Date -UFormat %j%S))))
+      .PARAMETER InputFile
+      This is the csv file that has the Hostnames and Ip Addresses.  
 
-for($i = 0;$i -lt $($SwitchImport.Length -1);$i++)
-{
-  $SwitchName = $SwitchImport[$i].'NetworkName'
-  $SwitchIp = [string]$(($SwitchImport[$i].'ipaddress').Replace('R.R','147.254'))
+                File format:
+                ╔=============================╗
+                ║        InputFile.csv        ║ 
+                ╠=============================╣
+                ║                             ║ 
+                ║ "Hostname","IpAddress"      ║ 
+                ║ "Old_Router","192.168.1.2"  ║ 
+                ║ "My Firewall","192.168.1.3" ║ 
+                ║ "Switch-Four","192.168.1.4" ║ 
+                ╚=============================╝
 
-  $PuttyBlurb = (@'
+      .PARAMETER PuttyReg
+      Output file.  This is just a file name.  If you leave it blank, the script will create a filename with the current user and Julian date appended.
+
+      .EXAMPLE
+      Add-PuttySessions -InputFile Value -PuttyRegBase Value -PuttyReg Value
+      This will take the hostnames and ipadresses in the -InputFile file and create a registry file by the name of the -PuttyReg
+
+      .NOTES
+      The 'PuttyRegBase' file must be in the same folder as the script.  It holds the default settings and header for the registry file.
+      If it is missing, you can recreate it by exporting your currentThis file can be rebuilt.
+
+      A. Quick easy:
+      1. Open a blank Notepad
+      2. Add the following line to the line one
+      3. Windows Registry Editor Version 5.00
+      4. Save the file as: 'PuttyRegBase'
+
+      B. Longer:
+      1. Open the Regeditor - regedit.exe
+      2. Export the following Key
+      3. [HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions\]
+      4. Save the file as: 'PuttyRegBase'
+
+
+      .INPUTS
+      A CSV file with a column named Hostname and IpAddress
+
+      .OUTPUTS
+      A Registry (reg) file that will be able to be merged into your current user environment.
+
+  #>
+
+
+  param
+  (
+    [Parameter(Position = 0)]
+    [ValidateScript({
+          If($_ -match '.csv')
+          {
+            $true
+          }
+          Else
+          {
+            Throw 'Input file needs to be CSV'
+          }
+    })][String]
+    $InputFile = '.\Input.csv',
+    
+    [Parameter(Position = 1)]
+    [ValidateScript({
+          If($_ -match '.reg')
+          {
+            $true
+          }
+          Else
+          {
+            Throw 'Input file needs to be reg'
+          }
+    })][String]
+    $PuttyReg = (New-Item -Path ('{2}\PuttySessions -{0}- ({1}).reg' -f $env:USERNAME, $(Get-Date -UFormat %j%S), "$env:userprofile\OneDrive\Desktop") -ItemType File -Force)
+  ) 
+        
+$SwitchImport = Import-Csv -Path $InputFile
+  $PuttyLogPath = 'C:\\Temp\\putty-&H-&Y&M&D-&T.log'
+  $PuttyRegBase = '.\PuTTYRegHeader'
+    
+  if(-not (Test-Path -Path $PuttyRegBase))
+  {
+    Write-Error -Message "'.\PuTTYRegHeader' missing.  This file should be located in the same directory/folder as the script"
+    Return
+  }
+    
+  Get-Content -Path $PuttyRegBase | Out-File -FilePath $PuttyReg
+  
+  foreach($switchData in $SwitchImport)
+  {
+    $SwitchName = $switchData.'HostName'
+    $SwitchIp = $switchData.'ipaddress'
+    
+    $PuttyBlurb = (@'
 [HKEY_CURRENT_USER\Software\Simontatham\PuTTY\Sessions\{0}]
 "Present"=dword:00000001
 "HostName"="{1}"
-"LogFileName"="C:\\Temp\\putty-&H-&Y&M&D-&T.log"
+"LogFileName"="{2}"
 "LogType"=dword:00000002
 "LogFileClash"=dword:ffffffff
 "LogFlush"=dword:00000001
@@ -144,7 +225,7 @@ for($i = 0;$i -lt $($SwitchImport.Length -1);$i++)
 "BoldAsColour"=dword:00000001
 "Colour0"="187,187,187"
 "Colour1"="255,255,255"
-"Colour2"={2}
+"Colour2"="0,0,0"
 "Colour3"="85,85,85"
 "Colour4"="0,0,0"
 "Colour5"="0,255,0"
@@ -243,8 +324,9 @@ for($i = 0;$i -lt $($SwitchImport.Length -1);$i++)
 "2"=dword:00000002
 
 
-'@ -f $SwitchName, $SwitchIp, '255,128,128')
-
-  $PuttyBlurb | Out-File  $PuttyReg -Append
-} 
+'@ -f $SwitchName, $SwitchIp, $PuttyLogPath)
+    
+    $PuttyBlurb | Out-File  -FilePath $PuttyReg -Append
+  } 
+}
 
