@@ -1,10 +1,19 @@
+$ConfigFile = '.\convertto.json'
+$HashConfig = Get-Content $ConfigFile | ConvertFrom-Json -AsHashtable
+
+$PDFApplicationTestSplat = $HashConfig.PDFApplicationTestSplat
+$PowerPointApplicationTestSplat = $HashConfig.PowerPointApplicationTestSplat
+$WordpadApplicationTestSplat = $HashConfig.WordpadApplicationTestSplat
+
+<#
+Original version
 ﻿$PDFApplicationTestSplat = @{
-  TestFile    = 'O:\OMC-S\IT\Scripts\FastCruise\FastCruiseTestFile.pdf'
+  TestFile    = '\\FastCruise\FastCruiseTestFile.pdf'
   TestProgram = "${env:ProgramFiles(x86)}\Adobe\Acrobat 2015\Acrobat\Acrobat.exe"
   ProcessName = 'Acrobat'
 }
 $PowerPointApplicationTestSplat = @{
-  TestFile    = 'O:\OMC-S\IT\Scripts\FastCruise\FastCruiseTestFile.pptx'
+  TestFile    = '\\FastCruise\FastCruiseTestFile.pptx'
   TestProgram = "${env:ProgramFiles(x86)}\Microsoft Office\Office16\POWERPNT.EXE"
   ProcessName = 'POWERPNT'
 }
@@ -13,6 +22,8 @@ $WordpadApplicationTestSplat = @{
   TestProgram = "$env:ProgramFiles\Windows NT\Accessories\wordpad.exe"
   ProcessName = 'wordpad'
 }
+
+#>
 
 
 function Start-ApplicationTest
